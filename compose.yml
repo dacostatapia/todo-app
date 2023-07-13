@@ -1,0 +1,94 @@
+services:
+  users-api-compose:
+    container_name: users-api-compose
+    image: dacostatapia/users-api:v1
+    restart: always
+    environment:
+      - JWT_SECRET=JWT_SECRET
+      - SERVER_PORT=8083
+      - ZIPKIN_URL=http://zipkin-compose:9411
+    networks:
+      - todo-app-network
+
+  auth-api-compose:
+    container_name: auth-api-compose
+    image: dacostatapia/auth-api:v1
+    restart: always
+    environment:
+      - AUTH_API_PORT=8000
+      - USERS_API_ADDRESS=http://users-api-compose:8083
+      - JWT_SECRET=JWT_SECRET
+      - ZIPKIN_URL=http://zipkin-compose:9411
+    depends_on:
+      - users-api-compose
+    networks:
+      - todo-app-network
+
+  frontend-compose:
+    container_name: frontend-compose
+    image: dacostatapia/frontend:v1
+    restart: always
+    environment:
+      - PORT=8080
+      - AUTH_API_ADDRESS=http://auth-api-compose:8000
+      - TODOS_API_ADDRESS=http://todos-api-compose:8082
+      - ZIPKIN_URL=http://zipkin-compose:9411
+    ports:
+      - 8080:8080
+    depends_on:
+      - auth-api-compose
+      - todos-api-compose
+    networks:
+      - todo-app-network
+
+  todos-api-compose:
+    container_name: todos-api-compose
+    image: dacostatapia/todos-api:v1
+    restart: always
+    environment:
+      - TODO_API_PORT=8082
+      - JWT_SECRET=JWT_SECRET
+      - REDIS_HOST=redis-compose
+      - REDIS_PORT=6379
+      - REDIS_CHANNEL=log_channel
+      - ZIPKIN_URL=http://zipkin-compose:9411
+    depends_on:
+      - redis-compose
+    networks:
+      - todo-app-network
+  
+  log-message-processor-compose:
+    container_name: log-message-processor-compose
+    image: dacostatapia/log-message-processor:v1
+    restart: always
+    environment:
+      - REDIS_HOST=redis-compose
+      - REDIS_PORT=6379
+      - REDIS_CHANNEL=log_channel
+      - ZIPKIN_URL=http://zipkin-compose:9411
+    depends_on:
+      - redis-compose
+    networks:
+      - todo-app-network
+  
+  redis-compose:
+    container_name: redis-compose
+    image: redis:7.0.5-alpine
+    restart: always
+    networks:
+      - todo-app-network
+  
+  zipkin-compose:
+    container_name: zipkin-compose
+    image: openzipkin/zipkin:2.24.1
+    restart: always
+    networks:
+      - todo-app-network
+
+secrets:
+  JWT_SECRET:
+    file: secrets.env
+      
+networks:
+  todo-app-network:
+    name: todo-app-network
