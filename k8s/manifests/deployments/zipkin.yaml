@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zipkin-deployment
+  namespace: dev
+  labels:
+    app: zipkin
+    object: deployment
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate 
+  template:
+    metadata:
+      name: zipkin-pod
+      namespace: dev
+      labels:
+        app: zipkin
+        object: pod
+    spec:
+      containers:
+        - name: zipkin-container
+          image: openzipkin/zipkin:2.24.1
+          # resources:
+          #   requests:
+          #     memory: "64Mi"
+          #     cpu: "250m"
+          #   limits:
+          #     memory: "128Mi"
+          #     cpu: "500m"          
+  selector:
+    matchLabels:
+      app: zipkin
+      object: pod
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: zipkin-service
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9411
+      targetPort: 9411
+  selector:
+    app: zipkin
+    object: pod

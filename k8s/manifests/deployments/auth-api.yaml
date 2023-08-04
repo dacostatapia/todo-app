@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-api-deployment
+  namespace: dev
+  labels:
+    app: auth-api
+    object: deployment
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      name: auth-api-pod
+      labels:
+        app: auth-api
+        object: pod
+    spec:
+      containers:
+        - name: auth-api-container
+          image: dacostatapia/auth-api:v2
+          env:
+            - name: AUTH_API_PORT
+              value: "8000"
+            - name: USERS_API_ADDRESS
+              value: http://users-api-service:8083
+            - name: JWT_SECRET
+              value: myfancysecret
+            - name: ZIPKIN_URL
+              value: http://zipkin-service:9411
+          # resources:
+          #   requests:
+          #     memory: "64Mi"
+          #     cpu: "250m"
+          #   limits:
+          #     memory: "128Mi"
+          #     cpu: "500m"
+  selector:
+    matchLabels:  
+      app: auth-api
+      object: pod
+    
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-api-service
+  namespace: dev
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8000
+      targetPort: 8000
+  selector:
+    app: auth-api
+    object: pod   

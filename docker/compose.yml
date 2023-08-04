@@ -1,7 +1,7 @@
 services:
   users-api-compose:
     container_name: users-api-compose
-    image: dacostatapia/users-api:v1
+    image: dacostatapia/users-api:v2
     restart: always
     environment:
       - JWT_SECRET=JWT_SECRET
@@ -12,7 +12,7 @@ services:
 
   auth-api-compose:
     container_name: auth-api-compose
-    image: dacostatapia/auth-api:v1
+    image: dacostatapia/auth-api:v2
     restart: always
     environment:
       - AUTH_API_PORT=8000
@@ -26,7 +26,7 @@ services:
 
   frontend-compose:
     container_name: frontend-compose
-    image: dacostatapia/frontend:v1
+    image: dacostatapia/frontend:v2
     restart: always
     environment:
       - PORT=8080
@@ -43,7 +43,7 @@ services:
 
   todos-api-compose:
     container_name: todos-api-compose
-    image: dacostatapia/todos-api:v1
+    image: dacostatapia/todos-api:v2
     restart: always
     environment:
       - TODO_API_PORT=8082
@@ -59,7 +59,7 @@ services:
   
   log-message-processor-compose:
     container_name: log-message-processor-compose
-    image: dacostatapia/log-message-processor:v1
+    image: dacostatapia/log-message-processor:v2
     restart: always
     environment:
       - REDIS_HOST=redis-compose

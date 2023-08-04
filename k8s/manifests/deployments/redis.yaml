@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-deployment
+  namespace: dev
+  labels:
+    app: redis
+    object: deployment
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate  
+  template:
+    metadata:
+      name: redis-pod
+      labels:
+        app: redis
+        object: pod
+    spec:
+      containers:
+        - name: redis
+          image: redis:7.0.5-alpine
+          # resources:
+          #   requests:
+          #     memory: "64Mi"
+          #     cpu: "250m"
+          #   limits:
+          #     memory: "128Mi"
+          #     cpu: "500m"          
+  selector:
+    matchLabels:
+      app: redis
+      object: pod
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  namespace: dev
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6379
+      targetPort: 6379
+  selector:
+    app: redis
+    object: pod
