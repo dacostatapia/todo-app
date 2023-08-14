@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todos-api-deployment
+  namespace: dev
+  labels:
+    app: todos-api
+    object: deployment
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate  
+  template:
+    metadata:
+      name: todos-api-pod
+      labels:
+        app: todos-api
+        object: pod
+    spec:
+      containers:
+        - name: todos-api-container
+          image: dacostatapia/todos-api:v2
+          env:
+            - name: TODO_API_PORT
+              value: "8082"
+            - name: JWT_SECRET
+              value: myfancysecret
+            - name: REDIS_HOST
+              value: redis-service
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_CHANNEL
+              value: log_channel
+            - name: ZIPKIN_URL
+              value: http://zipkin-service:9411
+          # resources:
+          #   requests:
+          #     memory: "64Mi"
+          #     cpu: "250m"
+          #   limits:
+          #     memory: "128Mi"
+          #     cpu: "500m"              
+  selector:
+    matchLabels:
+      app: todos-api
+      object: pod
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: todos-api-service
+  namespace: dev
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8082
+      targetPort: 8082
+  selector:
+    app: todos-api
+    object: pod

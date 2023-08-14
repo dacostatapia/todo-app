@@ -1,26 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: zipkin-deployment
+  name: redis-deployment
   namespace: dev
   labels:
-    app: zipkin
+    app: redis
     object: deployment
 spec:
   replicas: 1
   strategy:
-    type: RollingUpdate 
+    type: RollingUpdate  
   template:
     metadata:
-      name: zipkin-pod
-      namespace: dev
+      name: redis-pod
       labels:
-        app: zipkin
+        app: redis
         object: pod
     spec:
       containers:
-        - name: zipkin-container
-          image: openzipkin/zipkin:2.24.1
+        - name: redis
+          image: redis:7.0.5-alpine
           # resources:
           #   requests:
           #     memory: "64Mi"
@@ -30,7 +29,7 @@ spec:
           #     cpu: "500m"          
   selector:
     matchLabels:
-      app: zipkin
+      app: redis
       object: pod
 
 ---
@@ -38,13 +37,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: zipkin-service
+  name: redis-service
   namespace: dev
 spec:
   type: ClusterIP
   ports:
-    - port: 9411
-      targetPort: 9411
+    - port: 6379
+      targetPort: 6379
   selector:
-    app: zipkin
+    app: redis
     object: pod
